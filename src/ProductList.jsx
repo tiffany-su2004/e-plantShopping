@@ -1,16 +1,26 @@
 import React, { useState } from "react";
 import "./ProductList.css";
 import CartItem from "./CartItem";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"; // ✅ added useSelector
 import { addItem } from "./CartSlice"; // ✅ correct Redux action name
 
 function ProductList({ onHomeClick }) {
   const [showCart, setShowCart] = useState(false);
   const [showPlants, setShowPlants] = useState(false);
-  const [addedToCart, setAddedToCart] = useState({}); // ✅ track items added
+  const [addedToCart, setAddedToCart] = useState({});
   const dispatch = useDispatch();
 
-  // ✅ Array of categories and plants
+  // ✅ Access global cart state from Redux
+  const cartItems = useSelector((state) => state.cart.items);
+
+  // ✅ Calculate total quantity of items in the cart
+  const calculateTotalQuantity = () => {
+    return cartItems
+      ? cartItems.reduce((total, item) => total + item.quantity, 0)
+      : 0;
+  };
+
+  // ✅ Plant data
   const plantsArray = [
     {
       category: "Aromatic Plants",
@@ -70,9 +80,10 @@ function ProductList({ onHomeClick }) {
     color: "white",
     fontSize: "30px",
     textDecoration: "none",
+    position: "relative",
   };
 
-  // ✅ Navigation handlers
+  // ✅ Handlers
   const handleHomeClick = (e) => {
     e.preventDefault();
     onHomeClick();
@@ -94,12 +105,12 @@ function ProductList({ onHomeClick }) {
     setShowCart(false);
   };
 
-  // ✅ Add to cart handler (Redux + local state)
+  // ✅ Add-to-cart logic
   const handleAddToCart = (plant) => {
-    dispatch(addItem(plant)); // dispatch Redux action
+    dispatch(addItem(plant)); // send to Redux store
     setAddedToCart((prev) => ({
       ...prev,
-      [plant.name]: true, // mark this product as added
+      [plant.name]: true,
     }));
   };
 
@@ -130,6 +141,8 @@ function ProductList({ onHomeClick }) {
               Plants
             </a>
           </div>
+
+          {/* ✅ Cart icon with live quantity counter */}
           <div>
             <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
               <h1 className="cart">
@@ -151,6 +164,23 @@ function ProductList({ onHomeClick }) {
                     strokeWidth="2"
                   ></path>
                 </svg>
+
+                {/* 🔢 Cart quantity badge */}
+                <span
+                  className="cart-count"
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "-5px",
+                    backgroundColor: "red",
+                    color: "white",
+                    borderRadius: "50%",
+                    fontSize: "18px",
+                    padding: "2px 10px",
+                  }}
+                >
+                  {calculateTotalQuantity()}
+                </span>
               </h1>
             </a>
           </div>
