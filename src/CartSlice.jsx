@@ -1,21 +1,17 @@
-// src/CartSlice.jsx
 import { createSlice } from "@reduxjs/toolkit";
 
-// --- Initial State ---
 const initialState = {
-  items: [], // array of plants in the cart
+  items: [],
 };
 
-// --- Create the slice ---
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // 1️⃣ Add Item to Cart
+    // Add item to cart
     addItem: (state, action) => {
       const { name, image, cost } = action.payload;
       const existingItem = state.items.find((item) => item.name === name);
-
       if (existingItem) {
         existingItem.quantity++;
       } else {
@@ -23,24 +19,21 @@ const cartSlice = createSlice({
       }
     },
 
-    // 2️⃣ Remove Item from Cart
+    // Remove item from cart
     removeItem: (state, action) => {
-      state.items = state.items.filter(
-        (item) => item.name !== action.payload
-      );
+      state.items = state.items.filter((item) => item.name !== action.payload);
     },
 
-    // 3️⃣ Update Item Quantity
+    // Update quantity of existing item
     updateQuantity: (state, action) => {
       const { name, quantity } = action.payload;
-      const itemToUpdate = state.items.find((item) => item.name === name);
-      if (itemToUpdate) {
-        itemToUpdate.quantity = quantity;
+      const item = state.items.find((i) => i.name === name);
+      if (item) {
+        item.quantity = quantity;
       }
     },
   },
 });
 
-// --- Export actions and reducer ---
 export const { addItem, removeItem, updateQuantity } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -1,19 +1,36 @@
 import React, { useState } from "react";
-import "./ProductList.css";
 import { useDispatch, useSelector } from "react-redux";
 import { addItem } from "./CartSlice";
+import "./ProductList.css";
+import CartItem from "./CartItem";
 
 function ProductList({ onHomeClick }) {
   const dispatch = useDispatch();
-
-  // ✅ Access cart items from Redux store
   const cartItems = useSelector((state) => state.cart.items);
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // ✅ Track locally which buttons are pressed
+  const [showCart, setShowCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState({});
 
-  // ✅ Plant data — six plants, grouped in three categories
+  // Calculate total quantity for cart icon
+  const calculateTotalQuantity = () =>
+    cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Add-to-cart function
+  const handleAddToCart = (plant) => {
+    dispatch(addItem(plant));
+    setAddedToCart((prev) => ({ ...prev, [plant.name]: true }));
+  };
+
+  // Switch views
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    setShowCart(true);
+  };
+  const handleContinueShopping = (e) => {
+    e.preventDefault();
+    setShowCart(false);
+  };
+
+  // Six plants grouped into three categories
   const plantsArray = [
     {
       category: "Aromatic Plants",
@@ -74,20 +91,14 @@ function ProductList({ onHomeClick }) {
     },
   ];
 
-  // ✅ Add-to-cart logic
-  const handleAddToCart = (plant) => {
-    dispatch(addItem(plant));
-    setAddedToCart((prev) => ({ ...prev, [plant.name]: true }));
-  };
-
   return (
-    <div className="product-page">
-      {/* ✅ Navbar */}
+    <div>
+      {/* ✅ Navbar Header */}
       <div className="navbar">
         <div className="logo-section">
           <img
             src="https://cdn-icons-png.flaticon.com/512/766/766514.png"
-            alt="logo"
+            alt="Paradise Nursery Logo"
             className="logo"
           />
           <div className="brand-text">
@@ -100,46 +111,51 @@ function ProductList({ onHomeClick }) {
           <button className="nav-btn" onClick={onHomeClick}>
             Home
           </button>
-          <span className="nav-title">Plants</span>
-          <div className="cart-icon">
-            🛒<span className="cart-count">{totalItems}</span>
-          </div>
+          <button className="nav-btn" onClick={handleCartClick}>
+            🛒 Cart <span className="cart-count">{calculateTotalQuantity()}</span>
+          </button>
         </div>
       </div>
 
-      {/* ✅ Product sections */}
-      <div className="product-grid">
-        {plantsArray.map((category, index) => (
-          <div key={index} className="category-section">
-            <h2 className="category-title">{category.category}</h2>
-            <div className="product-list">
-              {category.plants.map((plant, plantIndex) => (
-                <div key={plantIndex} className="product-card">
-                  <img
-                    src={plant.image}
-                    alt={plant.name}
-                    className="product-image"
-                  />
-                  <h3 className="product-name">{plant.name}</h3>
-                  <p className="product-price">${plant.cost}</p>
-                  <button
-                    className="add-btn"
-                    onClick={() => handleAddToCart(plant)}
-                    disabled={addedToCart[plant.name]}
-                    style={{
-                      backgroundColor: addedToCart[plant.name]
-                        ? "gray"
-                        : "#4CAF50",
-                    }}
-                  >
-                    {addedToCart[plant.name] ? "Added to Cart" : "Add to Cart"}
-                  </button>
-                </div>
-              ))}
+      {/* ✅ Conditional Rendering: Product page or Cart page */}
+      {!showCart ? (
+        <div className="product-page">
+          {plantsArray.map((category, index) => (
+            <div key={index} className="category-section">
+              <h2 className="category-title">{category.category}</h2>
+              <div className="product-list">
+                {category.plants.map((plant, i) => (
+                  <div key={i} className="product-card">
+                    <img
+                      src={plant.image}
+                      alt={plant.name}
+                      className="product-image"
+                    />
+                    <h3 className="product-name">{plant.name}</h3>
+                    <p className="product-price">${plant.cost}</p>
+                    <button
+                      className="add-btn"
+                      onClick={() => handleAddToCart(plant)}
+                      disabled={addedToCart[plant.name]}
+                      style={{
+                        backgroundColor: addedToCart[plant.name]
+                          ? "gray"
+                          : "#4CAF50",
+                      }}
+                    >
+                      {addedToCart[plant.name]
+                        ? "Added to Cart"
+                        : "Add to Cart"}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <CartItem onContinueShopping={handleContinueShopping} />
+      )}
     </div>
   );
 }
