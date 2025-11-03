@@ -1,36 +1,23 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addItem } from "./CartSlice";
 import "./ProductList.css";
 import CartItem from "./CartItem";
+import { useDispatch, useSelector } from "react-redux";
+import { addItem } from "./CartSlice";
 
 function ProductList({ onHomeClick }) {
-  const dispatch = useDispatch();
-  const cartItems = useSelector((state) => state.cart.items);
   const [showCart, setShowCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState({});
+  const dispatch = useDispatch();
 
-  // Calculate total quantity for cart icon
-  const calculateTotalQuantity = () =>
-    cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartItems = useSelector((state) => state.cart.items);
 
-  // Add-to-cart function
-  const handleAddToCart = (plant) => {
-    dispatch(addItem(plant));
-    setAddedToCart((prev) => ({ ...prev, [plant.name]: true }));
+  const calculateTotalQuantity = () => {
+    return cartItems
+      ? cartItems.reduce((total, item) => total + item.quantity, 0)
+      : 0;
   };
 
-  // Switch views
-  const handleCartClick = (e) => {
-    e.preventDefault();
-    setShowCart(true);
-  };
-  const handleContinueShopping = (e) => {
-    e.preventDefault();
-    setShowCart(false);
-  };
-
-  // Six plants grouped into three categories
+  // ✅ Use public hosted image URLs so they show on GitHub Pages
   const plantsArray = [
     {
       category: "Aromatic Plants",
@@ -38,14 +25,14 @@ function ProductList({ onHomeClick }) {
         {
           name: "Lavender",
           image:
-            "https://cdn.pixabay.com/photo/2016/06/13/09/28/lavender-1457172_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/0/0c/Lavandula_angustifolia_%28French_Lavender%29.jpg",
           description: "Soothing fragrance and calming aroma.",
           cost: 12,
         },
         {
           name: "Rosemary",
           image:
-            "https://cdn.pixabay.com/photo/2015/02/11/12/50/rosemary-631155_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/5/59/Rosmarinus_officinalis2.jpg",
           description: "Fragrant herb used for cooking and relaxation.",
           cost: 10,
         },
@@ -57,14 +44,14 @@ function ProductList({ onHomeClick }) {
         {
           name: "Aloe Vera",
           image:
-            "https://cdn.pixabay.com/photo/2016/03/05/19/02/aloe-vera-1236725_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/f/f5/Aloe_vera_flower.JPG",
           description: "Healing plant for skin and overall wellness.",
           cost: 15,
         },
         {
           name: "Tulsi",
           image:
-            "https://cdn.pixabay.com/photo/2018/03/25/13/31/tulsi-3253573_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/3/3f/Ocimum_tenuiflorum2.jpg",
           description: "Known for its medicinal and spiritual value.",
           cost: 8,
         },
@@ -76,14 +63,14 @@ function ProductList({ onHomeClick }) {
         {
           name: "Snake Plant",
           image:
-            "https://cdn.pixabay.com/photo/2020/05/14/10/53/houseplants-5178128_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/f/fb/Sansevieria_trifasciata.jpg",
           description: "Air-purifying plant with tall upright leaves.",
           cost: 14,
         },
         {
           name: "Peace Lily",
           image:
-            "https://cdn.pixabay.com/photo/2021/04/17/17/14/peace-lily-6185241_1280.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/a/a0/Spathiphyllum_cochlearispathum_RTBG.jpg",
           description: "Elegant flowering plant ideal for indoor décor.",
           cost: 13,
         },
@@ -91,60 +78,81 @@ function ProductList({ onHomeClick }) {
     },
   ];
 
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    onHomeClick();
+  };
+
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    setShowCart(true);
+  };
+
+  const handleContinueShopping = (e) => {
+    e.preventDefault();
+    setShowCart(false);
+  };
+
+  const handleAddToCart = (plant) => {
+    dispatch(addItem(plant));
+    setAddedToCart((prev) => ({
+      ...prev,
+      [plant.name]: true,
+    }));
+  };
+
   return (
     <div>
-      {/* ✅ Navbar Header */}
+      {/* ✅ Navbar */}
       <div className="navbar">
-        <div className="logo-section">
+        <div className="navbar-left">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/766/766514.png"
-            alt="Paradise Nursery Logo"
+            src="https://cdn-icons-png.flaticon.com/512/7652/7652494.png"
+            alt="logo"
             className="logo"
           />
-          <div className="brand-text">
+          <div className="brand">
             <h2>Paradise Nursery</h2>
             <p>Where Green Meets Serenity</p>
           </div>
         </div>
-
-        <div className="nav-links">
-          <button className="nav-btn" onClick={onHomeClick}>
+        <div className="navbar-right">
+          <a href="#" onClick={handleHomeClick}>
             Home
-          </button>
-          <button className="nav-btn" onClick={handleCartClick}>
-            🛒 Cart <span className="cart-count">{calculateTotalQuantity()}</span>
-          </button>
+          </a>
+          <a href="#" onClick={handleCartClick}>
+            🛒 Cart
+            <span className="cart-count">{calculateTotalQuantity()}</span>
+          </a>
         </div>
       </div>
 
-      {/* ✅ Conditional Rendering: Product page or Cart page */}
+      {/* ✅ Main Content */}
       {!showCart ? (
-        <div className="product-page">
+        <div className="product-grid">
           {plantsArray.map((category, index) => (
             <div key={index} className="category-section">
               <h2 className="category-title">{category.category}</h2>
               <div className="product-list">
-                {category.plants.map((plant, i) => (
-                  <div key={i} className="product-card">
+                {category.plants.map((plant, plantIndex) => (
+                  <div key={plantIndex} className="product-card">
                     <img
                       src={plant.image}
                       alt={plant.name}
                       className="product-image"
                     />
-                    <h3 className="product-name">{plant.name}</h3>
+                    <h3 className="product-title">{plant.name}</h3>
+                    <p className="product-description">{plant.description}</p>
                     <p className="product-price">${plant.cost}</p>
                     <button
-                      className="add-btn"
+                      className={`product-button ${
+                        addedToCart[plant.name] ? "added-to-cart" : ""
+                      }`}
                       onClick={() => handleAddToCart(plant)}
                       disabled={addedToCart[plant.name]}
-                      style={{
-                        backgroundColor: addedToCart[plant.name]
-                          ? "gray"
-                          : "#4CAF50",
-                      }}
                     >
                       {addedToCart[plant.name]
-                        ? "Added to Cart"
+                        ? "Added to Cart ✓"
                         : "Add to Cart"}
                     </button>
                   </div>
